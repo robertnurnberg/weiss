@@ -26,8 +26,8 @@
 
 
 bool NoobBook;
-int NoobLimit;
 int failedQueries;
+int NoobLimit;
 
 
 // Probes noobpwnftw's Chess Cloud Database
@@ -43,9 +43,15 @@ bool ProbeNoob(Position *pos) {
     puts("info string NoobBook: Querying chessdb.cn for a move...");
 
     // Query dbcn
-    char *msg_fmt = "GET https://www.chessdb.cn/cdb.php?action=querybest&board=%s\n";
+    char *msg_fmt = "GET https://www.chessdb.cn/cdb.php?action=queryall&board=%s\n";
     char *hostname = "www.chessdb.cn";
     char *response = Query(hostname, msg_fmt, pos);
+
+    int ratecount = 0;
+    while (strstr(response, "rate limit exceeded") == response && ratecount < 50) {
+      response = Query(hostname, msg_fmt, pos);
+      ratecount++;
+    }
 
     // On success the response will be "move:[MOVE]"
     if (strstr(response, "move") != response)
